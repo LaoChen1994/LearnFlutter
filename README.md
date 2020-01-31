@@ -169,7 +169,7 @@ flutter并不像前端一样有分离的js,css,javascript,都是通过组件的�
 
 text是用于添加文字元素的，并给文字设置样式等。
 
-##### 代码示例
+##### 代码案例
 
 ~~~dart
 import "package:flutter/material.dart";
@@ -222,7 +222,7 @@ class MyApp extends StatelessWidget {
 
 该组件可以是一个容器，可以设置宽高，背景底色，margin, padding等，内部还可以作各种布局，类似于前端里面的拥有flex的div的感觉
 
-##### 代码示例
+##### 代码案例
 
 ~~~dart
 import "package:flutter/material.dart";
@@ -279,7 +279,7 @@ class MyApp extends StatelessWidget {
 
 #### 3. Image组件
 
-##### 代码示例
+##### 代码案例
 
 ~~~dart
 import 'dart:io';
@@ -353,7 +353,7 @@ class MyApp extends StatelessWidget {
 
 ##### 1. 基础列表
 
-###### 代码实现
+###### 代码案例
 
 ~~~dart
 import "package:flutter/material.dart";
@@ -414,7 +414,7 @@ class MyList extends StatelessWidget {
 
 ##### 2. 动态ListView
 
-###### 代码实现
+###### 代码案例
 
 ~~~dart
 import "package:flutter/material.dart";
@@ -460,7 +460,7 @@ class MyApp extends StatelessWidget {
 
 **GridView 和 ListView的区别**: listView是一个列表(左右上下的滑动列表)，类似于li，Grid是一个规定行列的表格，类似于table
 
-###### 代码实现
+###### 代码案例
 
 ~~~dart
 class MyApp extends StatelessWidget {
@@ -517,5 +517,293 @@ class MyApp extends StatelessWidget {
 
 ### 3. 布局部分
 
+##### 1. Row水平布局
 
+所谓的水平布局就是**单一横向的行内布局, 类似div标签**,每次调用一个Row，他会自动占用一行，其高度由内部元素的高度决定，Row组件是一个支持**弹性盒**布局的组件
+
+###### 代码案例
+
+~~~dart
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Layout Widget Demo',
+      home: Scaffold(
+        appBar: new AppBar(
+          title: new Text('Row Layout demo'),
+        ),
+        body: Row(
+          children: <Widget>[
+            Container(
+              child: Center(
+                child: Text(
+                  '左边的文字',
+                  style: TextStyle(color: Colors.white, fontSize: 15),
+                ),
+              ),
+              width: 300,
+              height: 200,
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [
+                Colors.lightBlue,
+                Colors.lightGreen,
+                Colors.orangeAccent,
+                Colors.redAccent
+              ])),
+            ),
+            // 启用弹性盒模式
+            Expanded(
+              child: Container(
+                child: Text('右边的文字'),
+                color: Colors.blueAccent,
+                margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                height: 200.0,
+                alignment: Alignment.center,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+~~~
+
+###### 结构说明
+
++ Row是一个横向布局的组件，其子元素会被横向排列，如果宽度大于屏幕宽度，则会把超出部分顶出屏幕
++ Row 是一个弹性盒模型，因此通过在子组件外包一个Expanded组件可以实现弹性布局
++ 这里适用于的布局情况是一端固定一端长度自适应，如果需要百分比布局的话需要使用FractionallySizedBox
+
+##### 2. Column纵向布局
+
+***column***是根据children中的最宽的元素作为列宽，做的整一列的布局，也支持弹性盒布局
+
+###### 代码案例
+
+~~~dart
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Layout Widget Demo',
+      home: Scaffold(
+          appBar: new AppBar(
+            title: new Text('Column Layout demo'),
+          ),
+          body: new Center(
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new RaisedButton(
+                  onPressed: () {},
+                  color: Colors.redAccent,
+                  child: new Text('Red Botton'),
+                ),
+                Expanded(child: new Text('这是一个很长的内容')),
+                new RaisedButton(
+                  onPressed: () {},
+                  color: Colors.yellowAccent,
+                  child: new Text(
+                    'yellow Button',
+                    style: TextStyle(color: Colors.blueGrey),
+                  ),
+                ),
+                new RaisedButton(
+                  onPressed: () {},
+                  color: Colors.lightBlue,
+                  child: new Text(
+                    'Blue Button',
+                    style: TextStyle(color: Colors.blueGrey),
+                  ),
+                ),
+              ],
+            ),
+          )),
+    );
+  }
+}
+~~~
+
+###### 结构说明
+
++ Column布局是弹性盒布局，通过Expanded来作自适应宽度布局
++ crossAxisAlignment: 横向布局的对齐方式
++ mainAxisAlignment: 纵向布局的对齐方式
+
+##### 3. 百分比布局
+
+百分比布局主要有两个手段
+
++ 使用FractionallySizedBox
++ 使用Flexible组件
+
+###### 代码案例
+
++ 使用FractionallySizedBox
+
+~~~dart
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Layout Widget Demo',
+      home: Scaffold(
+          appBar: new AppBar(
+            title: new Text('Row Layout demo'),
+          ),
+          body: Column(
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Container(
+                    width: 300,
+                    height: 300,
+                    color: Colors.red,
+                    alignment: Alignment.bottomRight,
+                    child: FractionallySizedBox(
+                      widthFactor: 0.7,
+                      heightFactor: 0.5,
+                      child: Container(
+                        height: 200,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  )
+                ],
+              )
+            ],
+          )),
+    );
+  }
+}
+~~~
+
++ 使用Flexible
+
+~~~dart
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Layout Widget Demo',
+      home: Scaffold(
+          appBar: new AppBar(
+            title: new Text('Row Layout demo'),
+          ),
+          body:
+              Container(
+                height: 500,
+                margin: EdgeInsets.all(10),
+                child: 
+                Column(
+                  children: <Widget>[
+                    Flexible(
+                      // 设置在所有Flex元素中的百分比占1/5
+                      flex: 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(width: 1, color: Colors.black),
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      // 占 3/5
+                      flex: 3,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(width: 1, color: Colors.black),
+                          color: Colors.red,
+                        ),
+                        margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                      ),
+                    ),
+                    Flexible(
+                     // 占1/5
+                      flex: 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(width: 1, color: Colors.black),
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ),
+    );
+  }
+}
+~~~
+
+
+
+###### 结构说明
+
++ FractionallySizedBox通过设置widthFactor, heightFactor可以将盒子的大小设置为父元素的百分比
++ FractionallySizedBox一般用来设置和父元素之间存在百分比大小的元素的场和宽，一般父元素内只有一个元素的时候用比较好
++ Flexible包裹的元素，通过flex设定其在所有flexible元素中的百分比，比如一共flex的有5份，设为flex:1的元素就是占1/5，和flex布局中的flex属性类似。
+
+##### 4. 层叠布局(绝对定位)
+
+###### 代码案例
+
+~~~dart
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    var stack = new Stack(
+      children: <Widget>[
+        new Container(
+          height: 300,
+          color: Colors.lightGreen,
+        ),
+        new Container(
+          decoration: new BoxDecoration(
+              color: Colors.lightBlue,
+              border: Border.all(width: 1, color: Colors.pinkAccent)),
+          padding: EdgeInsets.all(10.0),
+          margin: EdgeInsets.all(20.0),
+          child: new Text('Caption'),
+        ),
+        new Positioned(
+          top: 10.0,
+          left: 200,
+          child: new Container(
+            decoration: BoxDecoration(
+                color: Colors.red,
+                border: Border.all(width: 1, color: Colors.greenAccent)),
+            child: new Text('第二个层叠'),
+          ),
+        ),
+      ],
+      alignment: const FractionalOffset(0.5, 0.9),
+    );
+
+    return new MaterialApp(
+      title: '层叠布局',
+      home: Scaffold(
+        appBar: new AppBar(title: new Text('层叠布局')),
+        body: stack,
+      ),
+    );
+  }
+}
+
+~~~
+
+###### 结构说明
+
++ 利用stack生成层叠对象，写在越前面的元素放在越下面，类似于z-index值越小
++ 利用Positioned包裹的元素其对齐位置按照top, left设置安排，如果没有包裹的元素继承Stack中的alignment
++ Postiion中设置百分比的定位还没研究过
++ FractionaslOffset可以设置其百分比对齐位置
 
