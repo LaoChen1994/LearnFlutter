@@ -353,7 +353,7 @@ class MyApp extends StatelessWidget {
 
 ##### 1. 基础列表
 
-##### 代码实现
+###### 代码实现
 
 ~~~dart
 import "package:flutter/material.dart";
@@ -407,12 +407,12 @@ class MyList extends StatelessWidget {
 
 ###### 结构说明
 
-+ listView外部不能嵌套Column组件，否则会报错
++ listView外部不能嵌套Row组件，否则会报错
 + ListView是一个大的容器，里面的ListTile相当于每条列表信息，通过配置leading是设置最左边的表示，title代表的是他的标题
 + listView中的Children可以包含各种组件都是OK的
 + 组件的封装就相当于重新创建一个class然后通过 new 调用这个组件即可
 
-##### 动态ListView
+##### 2. 动态ListView
 
 ###### 代码实现
 
@@ -456,9 +456,66 @@ class MyApp extends StatelessWidget {
   + 通过itemBuilder进行动态生成，其中的index是循环的索引值，通过item[index]获得循环到的元素，之后通过获得的该元素，来组织得到每个单独的模块，来动态生成
   + 返回一个ListTile组件放到ListView中
 
-##### GridView网格列表
+#### 5. GridView网格列表
 
 **GridView 和 ListView的区别**: listView是一个列表(左右上下的滑动列表)，类似于li，Grid是一个规定行列的表格，类似于table
 
 ###### 代码实现
+
+~~~dart
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Grid View',
+      home: Scaffold(
+          appBar: new AppBar(title: new Text('Grid View')),
+          body: GridView(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                // 纵向之间的间隔
+                mainAxisSpacing: 10.0,
+                // 横向之间的间隔
+                crossAxisSpacing: 10.0,
+                // 长宽比
+                childAspectRatio: 0.5),
+            children: <Widget>[
+              Image.network(
+                  'http://img5.mtime.cn/mt/2019/12/06/151723.54470898_140X210X4.jpg'),
+              Image.network(
+                  'http://img5.mtime.cn/mt/2019/12/27/102155.97632815_140X210X4.jpg'),
+              Image.network(
+                  'http://img5.mtime.cn/mt/2019/12/17/105242.88827408_140X210X4.jpg'),
+              Image.network(
+                  'http://img5.mtime.cn/mt/2019/12/27/101619.41873766_140X210X4.jpg'),
+              Image.network(
+                  'http://img5.mtime.cn/mt/2019/12/16/102337.73663733_140X210X4.jpg'),
+              Image.network(
+                  'http://img5.mtime.cn/mt/2020/01/16/151210.15087026_140X210X4.jpg'),
+              Image.network(
+                  'http://img5.mtime.cn/mt/2019/12/27/101619.41873766_140X210X4.jpg'),
+              Image.network(
+                  'http://img5.mtime.cn/mt/2019/12/16/102337.73663733_140X210X4.jpg'),
+              Image.network(
+                  'http://img5.mtime.cn/mt/2020/01/16/151210.15087026_140X210X4.jpg'),
+            ],
+          )),
+    );
+  }
+}
+~~~
+
+###### 结构说明
+
++ GridView的效果是一个相册的效果就是手机点开相册，一块块豆腐干排列的效果
++ 常用参数说明gridDelegate
+  + crossAxisCount: 横向的最大排列元素的个数
+  + crossAxisSpacing: 横向元素时间的间隔
+  + crossAxisSpacing: 纵向元素之间的间隔
+  + childAspectRatio: 长宽比(横纵比)，这里是横的长度比纵宽度的
+  + children: 是一个Widget[]
+
+### 3. 布局部分
+
+
 

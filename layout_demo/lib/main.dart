@@ -1,111 +1,199 @@
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 
 void main() => runApp(MyApp());
 
+// Row 水平布局
+
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     // TODO: implement build
+//     return MaterialApp(
+//       title: 'Layout Widget Demo',
+//       home: Scaffold(
+//         appBar: new AppBar(
+//           title: new Text('Row Layout demo'),
+//         ),
+//         body: new Row(
+//           children: <Widget>[
+//             Expanded(
+//                 child: new RaisedButton(
+//               onPressed: () {},
+//               color: Colors.redAccent,
+//               child: new Text('Red Botton'),
+//             )),
+//             Expanded(
+//               child: new RaisedButton(
+//                 onPressed: () {},
+//                 color: Colors.yellowAccent,
+//                 child: new Text(
+//                   'yellow Button',
+//                   style: TextStyle(color: Colors.blueGrey),
+//                 ),
+//               ),
+//             ),
+//             Expanded(
+//               child: new RaisedButton(
+//                 onPressed: () {},
+//                 color: Colors.lightBlue,
+//                 child: new Text(
+//                   'Blue Button',
+//                   style: TextStyle(color: Colors.blueGrey),
+//                 ),
+//               ),
+//             )
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// Column 垂直布局
+// column是根据children中的最宽的元素作为列宽，做的整一列的布局
+
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     // TODO: implement build
+//     return MaterialApp(
+//       title: 'Layout Widget Demo',
+//       home: Scaffold(
+//           appBar: new AppBar(
+//             title: new Text('Column Layout demo'),
+//           ),
+//           body: new Center(
+//             child: new Column(
+//               crossAxisAlignment: CrossAxisAlignment.center,
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: <Widget>[
+//                 new RaisedButton(
+//                   onPressed: () {},
+//                   color: Colors.redAccent,
+//                   child: new Text('Red Botton'),
+//                 ),
+//                 Expanded(child: new Text('大他大')),
+//                 new RaisedButton(
+//                   onPressed: () {},
+//                   color: Colors.yellowAccent,
+//                   child: new Text(
+//                     'yellow Button',
+//                     style: TextStyle(color: Colors.blueGrey),
+//                   ),
+//                 ),
+//                 new RaisedButton(
+//                   onPressed: () {},
+//                   color: Colors.lightBlue,
+//                   child: new Text(
+//                     'Blue Button',
+//                     style: TextStyle(color: Colors.blueGrey),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           )),
+//     );
+//   }
+// }
+
+// 绝对定位和层叠布局
+// class MyApp extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     // TODO: implement build
+//     var stack = new Stack(
+//       children: <Widget>[
+//         new CircleAvatar(
+//           backgroundImage: new NetworkImage(
+//               'http://img5.mtime.cn/mt/2019/12/06/151723.54470898_140X210X4.jpg'),
+//           radius: 200,
+//         ),
+//         new Container(
+//           decoration: new BoxDecoration(
+//               color: Colors.lightBlue,
+//               border: Border.all(width: 1, color: Colors.pinkAccent)),
+//           padding: EdgeInsets.all(10.0),
+//           margin: EdgeInsets.all(20.0),
+//           child: new Text('Caption'),
+//         ),
+//         new Positioned(
+//           top: 10.0,
+//           left: 200,
+//           child: new Container(
+//             decoration: BoxDecoration(
+//                 color: Colors.red,
+//                 border: Border.all(width: 1, color: Colors.greenAccent)),
+//             child: new Text('第二个层叠'),
+//           ),
+//         ),
+//       ],
+//       alignment: const FractionalOffset(0.5, 0.9),
+//     );
+
+//     return new MaterialApp(
+//       title: '层叠布局',
+//       home: Scaffold(
+//         appBar: new AppBar(title: new Text('层叠布局')),
+//         body: stack,
+//       ),
+//     );
+//   }
+// }
+
+// 卡片布局
+
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
+    // TODO: implement build
+
+    var card = new Card(
+      child: new Column(
+        children: <Widget>[
+          ListTile(
+            title: Text(
+              '张三',
+              style: TextStyle(fontWeight: FontWeight.w400),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            subtitle: new Text('武汉锅盔商家'),
+            leading: new Icon(Icons.add_call),
+          ),
+          new Divider(
+            color: Colors.red,
+          ),
+          ListTile(
+            title: Text(
+              '李四',
+              style: TextStyle(fontWeight: FontWeight.w400),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            subtitle: new Text('武汉热擀面商家'),
+            leading: new Icon(Icons.add_call),
+          ),
+          new Divider(
+            color: Colors.blueAccent,
+          ),
+          ListTile(
+            title: Text(
+              '王五',
+              style: TextStyle(fontWeight: FontWeight.w400),
+            ),
+            contentPadding: EdgeInsets.all(10),
+            subtitle: new Text('杭州西湖藕粉'),
+            leading: new Icon(Icons.add_call),
+          ),
+          new Divider(color: Colors.greenAccent),
+        ],
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
-  }
-}
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+    return new MaterialApp(
+      title: '层叠布局',
+      home: Scaffold(
+        appBar: new AppBar(title: new Text('层叠布局')),
+        body: card,
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
