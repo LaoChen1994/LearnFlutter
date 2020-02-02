@@ -1,0 +1,6 @@
+name: layout_demo
+description: A new Dart project.
+
+dependencies:
+  flutter:
+    sdk: flutter

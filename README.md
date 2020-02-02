@@ -807,3 +807,569 @@ class MyApp extends StatelessWidget {
 + Postiion中设置百分比的定位还没研究过
 + FractionaslOffset可以设置其百分比对齐位置
 
+### 4. Dart的基础语法
+
+主要参考: [dart官方文档](https://dart.dev/samples)
+
+#### 1. 变量
+
+>  dart和javascript不同是一种强类型语言，所以其定义变量的时候需要给出具体变量的类型，如果不指定，变量的类型就已第一次定义的类型为准，如果赋值给其不同类型就会报错。
+
+其变量定义方法通常为 **[声明符号]\(如果是dynamic可省略) + [类型]\(可省略) + [变量名]**,但是注意**声明符号和类型不能同时省略**
+
++ 声明号包括:
+
+	+ var: 定义一个可变便变量，其后跟的类型省略，会自动获取赋值得到的类型，后续对其赋值，类型不能变
+	+ final/const 指定一个不可变的变量值，只能在声明的时候被赋值一次，两者的区别是const 是在编译阶段为一个常量，如果const 用于class内，则需要将const 改为static const， final可以直接使用
+	+ dynamic dynamic定义的一个可变变量，其类型和值都可变
+
++ 常用类型包括
+
+  + 数值类型(Number): int，double
+  + 字符串类型String
+  + 布尔类型Booleans
+  + 列表类型List和Set类型
+  + Map类型
+
+  除上述类型外，还有Runes and Grapheme Clusters 和 Symbols类型，具体作用前者好像是用于保存特殊字符，后者和js的symbol类似，以后用到再总结用法了。
+
+##### 1. 数值变量
+
+###### 1. 定义方法
+
+~~~dart
+  int num1 = 3;
+  double num2 = 3.053;
+  var expNum = 1e5;
+
+  print(expNum); // 100000
+  // 自动识别为double;
+  var res = num1 + num2;
+  print(res); // 6.0
+~~~
+
+###### 2. 类型转换
+
++ String转int或者double, 使用*.parse方法
++ double, int转String使用toString等方法
+
+~~~dart
+  // int -> String
+  print(num1.toString());
+  // double -> String
+  print('double2string ${res.toString()}'); // 6.053
+  // 保留小数点后的位数
+  print('double2String ${num2.toStringAsFixed(2)}'); // 3.05
+  // 保留有效数字
+  print('double2String ${num2.toStringAsPrecision(3)}'); // 3.1
+  // 转换为指数
+  print('trans2Exp ${num2.toStringAsExponential()}'); // 3.053e+0
+
+  // string -> int or doublue
+  // 使用Number的parse方法
+
+  String s2n1 = '1';
+  String s2n2 = '1.1';
+
+  print('s2n1 = ${int.parse(s2n1)} s2n2 = ${double.parse(s2n2)}'); // s2n1 = 1 s2n2 = 1.1
+
+~~~
+
+##### 2. 字符串变量
+
+###### 1. 定义方法
+
+~~~dart
+// 字符串类型
+var s1 = "string";
+String s2 = 'str2';
+~~~
+
+###### 2. 字符串拼接
+
++ 使用字符串之间的+运算
++ 使用$来调用表达式
+
+~~~dart
+  // 字符串拼接
+  var s3 = '$s1 + $s2'; 
+  var s4 = s1 + "+" + s2; 
+  print(s3); // string + string2
+  print(s4); // string+string2
+~~~
+
+###### 3. 创建多行文本
+
++ 多行内写字符串，中见不添加逗号
++ 使用"""三引号包裹
+
+上述两种方法的区别：
+
++ 方法1是一种字符串拼接的方法，显示仍为统一行拼接
++ 方法2打印的结果也会换行
+
+~~~dart
+var multi1 = "multi1="
+  "这是"
+  "多行字符串1";
+
+  var multi2 = """
+  muliti2=
+  这是
+  多行字符串2
+  """;
+  
+
+  print(multi1);
+  /*
+  multi1=这是多行字符串1
+  */
+  print(multi2);
+  /*
+    muliti2=
+      这是
+      多行字符串2
+  */
+~~~
+
+###### 4. 字符串转义
+
+在字符串前添加r即可转义
+
+###### 6. 类型转换
+
++ 数值型和字符串转换参见数值变量
++ 字符串和List之间的转换方法
+  + 字符串转List： split
+  + List转字符串：join方法
+
+~~~dart
+  // 字符串转数组
+  print(s1.split("")); // [s,t,r,i,n,g]
+
+  // 字符串类型List定义
+  List<String> friends = ['mary', 'jack'];
+  print(friends.where((name) => name.startsWith('m'))); // mary
+  // 数组转字符串
+  print(friends.join("-"));// mary-jack
+~~~
+
+##### 3.布尔 类型
+
+true 和 false，引用官网的代码
+
+~~~dart
+  // boolean
+  // Check for an empty string.
+  var fullName = '';
+  print(fullName.isEmpty); // true
+
+  // Check for zero.
+  var hitPoints = 0;
+  print(hitPoints <= 0); // true
+
+  // Check for null.
+  var unicorn;
+  // 未定义值的变量为null 而不是undefined和js不同
+  print(unicorn == null); // true
+
+  // Check for NaN.
+  // 除以0得到的结果为NaN
+  var iMeantToDoThis = 0 / 0;
+  print(iMeantToDoThis.isNaN); // true 
+~~~
+
+##### 4. 列表类型List
+
+###### 1. 定义方法
+
+~~~dart
+  List<int> list1 = const [0, 1, 2];
+  List<String> list2 = ['jack', 'mary'];
+  List nullList;
+~~~
+
+###### 2. List元素的索引查看和修改
+
+注意点：
+
++ list1定义了一个**不可修改的List**，因此如果对该数值进行修改会有问题
++ list2虽然是**可变的List**，但是如果**查看和修改不存在索引值会报错**，如果要**增加List**需要通过**add**方法
+
+具体的看下面的例子
+
+~~~dart
+  print('list1[1] = ${list1[1]}'); // 1
+  // 不可修改类型
+  // list1[1] = 2; // 报错，因为这里的list1是不可修改类型
+
+  // list2长度只有2，添加额外的第三个元素是不被允许的
+  // list2[2] = 'Tom';
+  // 如果要增加list长度需要使用add方法
+  list2.add('tom');
+  list2[1] = 'Mary'
+  print(list2); // [jack, Mary, tom]
+~~~
+
+###### 3. list合并
+
+Dart拥有两种List的合并方法(...)和(...?)两种：
+
++ **...**在**元素确定存在**的时候使用
++ **...?**保证在元素数组**不存在(声明了未赋值为null)**的时候不会报错，但是...?后面跟的一定是一个数组元素
+
+看下面的例子
+
+~~~dart
+  // list合并
+  var list3 = [...list2, ...list1, ...?nullList];
+  print(list3); // [jack, Mary, tom, 0, 1, 2]
+~~~
+
+###### 4. List与if 和 for的连用
+
+在List的定义过程中可以同for和if语法连用，十分灵活的感觉。
+
+~~~dart
+  const f1 = true;
+  const f2 = false;
+
+  List list4 = [
+    '1',
+    if(f1) 'f1',
+    if(f2) 'f2',
+    for (var i in list3) 'list4-$i' 
+  ];
+
+  print(list4);
+~~~
+
+##### 5. 集合类型Set
+
+Set可以认为是一个没有重复的列表，其具体方法和List类似通过下面的例子直观看一下。
+
+~~~dart
+  Set<String> set1 = {"苹果", '香蕉', '火龙果'};
+  set1.add('西瓜');
+  set1.add('苹果');
+  print(set1); // {苹果, 香蕉, 火龙果, 西瓜}
+  set1.remove('西瓜'); // {苹果, 香蕉, 火龙果}
+  print('苹果');
+  print(set1);
+
+  Set<String> set2 = {'包子','馒头', '火腿肠'};
+  print({...set1, ...set2}); // {苹果, 香蕉, 火龙果, 包子, 馒头, 火腿肠}
+
+  bool addFood = false;
+  List<String> fruit  = ['樱桃', '山竹', '水蜜桃'];
+
+  print({...set1, if(addFood) ...set2, for(var i in fruit) 'extra-$i' }); // {苹果, 香蕉, 火龙果, extra-樱桃, extra-山竹, extra-水蜜桃}
+
+~~~
+
++ ...和...?的拓展运算符也是一样支持的
++ if 和 for等语法也可在Set中应用
+
+##### 6. Map类型
+
+这里要注意和JS不一样，JS的对象字面写法类似与Dart，但是Dart中的**Map类型和类**是两个东西！
+
+Map有好几种类型：Map, HashMap,LinkedHashMap,SplayTreeMap
+
+其具体差别可以看[简单讲讲几种Map之间的区别](https://cloud.tencent.com/developer/article/1405855)
+
+Map和LinkedHashMap都返回按照插入顺序排列的Map，但是HashMap在遍历时，顺序是无法保证的
+
+###### 1. Map的创建、插入、删除、遍历
+
+~~~dart
+  var map1 = HashMap();
+  map1['abc'] = '1';
+  map1['cccasd'] = "2";
+  map1['aaa123'] = "3";
+
+  map1.forEach((key, value) => print('key=$key, value=$value'));
+  /*
+  	key=cccasd, value=2
+    key=abc, value=1
+    key=aaa123, value=3	
+  */
+
+
+  var map2 = Map(); // LinkedHashMap
+  map2['abc'] = '1';
+  map2['cccasd'] = "2";
+  map2['aaa123'] = "3";
+
+  print(map2); // {abc: 1, cccasd: 2, aaa123: 3}
+	
+  // LinkedHashMap可以保证遍历的顺序和插入顺序一致
+  map2.forEach((key, value) => print('key=$key, value=$value'));
+  /*
+  	key=abc, value=1
+    key=cccasd, value=2
+    key=aaa123, value=3
+  */
+
+  map2.remove('abc');
+  print(map2);// {cccasd: 2, aaa123: 3}
+~~~
+
+###### 2. Map的合并
+
+~~~dart
+  var map3 = {
+    ...map1,
+    ...map2
+  };
+  print(map3); // {cccasd: 2, abc: 1, aaa123: 3}
+
+  var map4 = {
+    ...map2
+  };
+  print(map4 == map2); // false
+~~~
+
++ 合并时，相同键值的会合并
++ 合并后的Map和原来的Map并不相等
+
+#### 2. 函数
+
+函数是dart中的第一公民，也是一种对象，在dart中一切都是对象，因此也可以将函数作为参数传给函数或者对象
+
+##### 1. 函数定义方法
+
+Dart中的函数主要分为三种：
+
++ 位置参数函数
++ 具名函数
++ 匿名函数
+
+###### 位置参数函数定义调用方式
+
++ 可选和必填参数的定义方法
+  + 可选参数通过[]的形式进行包裹，这种参数在调用的过程中可以省略不添加
+  + 如果没有通过[]的形式进行包裹说明该参数必填
+  + 如果要给可选参数指定默认值，可以直接通过 **= + [默认值]**的方式添加参数的默认值
+
+~~~dart
+var favoriateFruit = {"苹果", '香蕉', '橘子'};
+var fruitMap = {"苹果": 5.5, '香蕉': 3.99, '橘子': 6.8};
+
+// 没有参数的函数
+dynamic getFruitPrice() {
+  print(favoriateFruit);
+  print(fruitMap);
+}
+
+// 多重逻辑的时候需要使用函数表达式定义
+// 未命名函数定义方法
+// 通过位置参数命名的方式的函数，其需要通过添加匿名函数的话需要通过[]包裹对应的函数名
+dynamic getPrice(String fruit, [String notes = '默认notes']) {
+  if (notes != null) {
+    print('notes = $notes');
+  }
+
+  if (favoriateFruit.contains(fruit)) {
+    return fruitMap[fruit];
+  }
+
+  return null;
+}
+
+~~~
+
++ 位置参数函数的调用方式
+
+~~~dart
+void main(){
+  var price = getPrice('香蕉', '看看香蕉的价格');
+  // 可选参数可以先不赋值，启用默认赋值。
+  var nullPrice = getPrice('火龙果');
+  print(price);
+  print(nullPrice);
+}
+/*
+notes = 看看香蕉的价格
+notes = 默认notes
+3.99
+null
+*/
+~~~
+
+
+
+###### 具名函数的定义调用方式
+
+**可选和不可选函数的定义方式**
+
++ 定义函数的时候传入一个类似于set的对象
++ 如果是必填参数需要使用@required进行声明
++ 没有通过required声明的均为可选参数
++ @required再meta.dart中定义，因此使用的时候需要添加meta包，不然会报错
++ 设定默认参数的方法和具名函数一样，利用等号赋值即可
+
+~~~dart
+import 'package:meta/meta.dart';
+
+void addFruit(
+    {String fruit = "", double price = 100.0, @required String notes}) {
+  favoriateFruit.add(fruit);
+  fruitMap[fruit] = price;
+  print(notes);
+}
+~~~
+
+> 添加meta包的方法，可以通过调用flutter包来解决，具体方法
+>
+> 	1. 创建一个pubspec.yaml的文件
+>  	2. 填写下面代码即可
+>
+> ~~~yaml
+> name: demo
+> description: A new Dart project.
+> # 主要是这个依赖
+> dependencies:
+>   flutter:
+>     sdk: flutter
+> ~~~
+>
+> 
+
+**具名函数的调用方式**
+
+~~~dart
+addFruit(fruit: '草莓', price: 23.5, notes: '增加草莓');
+// price没有被传入时使用默认值
+addFruit(notes: '冬瓜，价格不详', fruit: '冬瓜');
+getFruitPrice();
+/*
+    增加草莓
+    冬瓜，价格不详
+    {苹果, 香蕉, 橘子, 草莓, 冬瓜}
+    {苹果: 5.5, 香蕉: 3.99, 橘子: 6.8, 草莓: 23.5, 冬瓜: 100.0}
+*/
+~~~
+
+
+
+###### 匿名函数的定义
+
+~~~dart
+    List<Map<String, String>> fruitList = [
+        {"fruit": "榴莲", "price": "32"},
+        {"fruit": "菠萝", "price": "3.5"}
+    ];
+  	
+	// 下面两个结果完全一致
+	// 匿名函数的使用方法
+    fruitList.forEach((elem) {
+        String str = "${elem['fruit']}一斤价格是${elem['price']}";
+        print(str);
+    });
+
+    // 如果表达式只有一句话，可以使用箭头函数
+    fruitList.forEach((elem) => print("${elem['fruit']}一斤价格是${elem['price']}"));
+
+	/*
+        榴莲一斤价格是32
+        菠萝一斤价格是3.5
+        榴莲一斤价格是32
+        菠萝一斤价格是3.5
+	*/
+~~~
+
+
+
+##### 2. 函数作为参数传入
+
+~~~dart
+  	// 函数是第一公民可以，可以将函数传给函数
+    // 定义一个forEach的处理函数
+    void addFruitByList(Map<String, String> elem) {
+      addFruit(
+          notes: '批量增加水果',
+          fruit: elem['fruit'],
+          price: double.parse(elem['price']));
+    }
+
+    void main() {
+        fruitList.forEach(addFruitByList);
+        getFruitPrice();    
+    }
+	/*
+        批量增加水果
+        批量增加水果
+        {苹果, 香蕉, 橘子, 草莓, 冬瓜, 榴莲, 菠萝}
+        {苹果: 5.5, 香蕉: 3.99, 橘子: 6.8, 草莓: 23.5, 冬瓜: 100.0, 榴莲: 32.0, 菠萝: 3.5}
+	*/
+~~~
+
+##### 3. 作用域
+
+函数作用域和JS有不同，不管是var还是const定义的变量在函数作用域内到定义变量之前都为死区
+
+~~~dart
+void forScope() {
+  // 变量定以后这个var和js中的const一样会存在死区，因此定义和了外部一样的变量就无法再获得外部变量的值了
+  // 这里会报错
+  // print(fruitMap);
+
+  var fruitMap = {'测试'};
+  print('我是第一层=$fruitMap');
+
+  void Second() {
+    var fruitMap = {'第二层'};
+    print('我是第二层=$fruitMap');
+  }
+
+  Second();
+}
+
+/*
+    我是第一层={测试}
+    我是第二层={第二层}
+*/
+~~~
+
+
+
+##### 3. 闭包语法的使用
+
+使用闭包能够做到柯里化，和JS中的使用方法完全一致，不做赘述
+
+~~~dart
+// 闭包语法的使用
+dynamic definePriceChanger(String fruit) {
+  if (fruitMap.keys.contains(fruit)) {
+    print('$fruit 价格可以变动');
+    return (num price) {
+      fruitMap[fruit] = price;
+    };
+  } else {
+    return ([num _noParam]) {
+      print('水果价格不可修改');
+    };
+  }
+}
+
+void main() {
+	var changeBanana = definePriceChanger('香蕉');
+    getFruitPrice();
+    changeBanana(2.99);
+    getFruitPrice();
+}
+/*
+    {苹果, 香蕉, 橘子, 草莓, 冬瓜, 榴莲, 菠萝}
+    {苹果: 5.5, 香蕉: 3.99, 橘子: 6.8, 草莓: 23.5, 冬瓜: 100.0, 榴莲: 32.0, 菠萝: 3.5}
+    {苹果, 香蕉, 橘子, 草莓, 冬瓜, 榴莲, 菠萝}
+    {苹果: 5.5, 香蕉: 2.99, 橘子: 6.8, 草莓: 23.5, 冬瓜: 100.0, 榴莲: 32.0, 菠萝: 3.5}
+*/
+~~~
+
+
+
+
+
+
+
