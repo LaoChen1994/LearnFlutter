@@ -1369,7 +1369,194 @@ void main() {
 
 
 
+#### 3. 控制流方法
+
+##### 1. if
+
+和JS一样具有if -----else if -----else的结构
+
+~~~dart
+import 'dart:math';
+
+void main() {
+  // if循环
+  int score = Random().nextInt(100);
+  if (score < 60) {
+    print('不及格');
+  } else if (score < 80) {
+    print('回家继续补习');
+  } else if (score < 90) {
+    print('回家可以看电视');
+  } else {
+    print('可以回家打游戏了');
+  }
+}
+~~~
 
 
 
+##### 2. 循环语法for和forEach
+
+几个重点:
+
++ var死区带来和JS在循环赋值函数带来的不同表现形式
++ 对于可迭代类型(Set或者List)，可以通过forEach代替for循环，但是该循环没有索引index可以获取
++ 对于可迭代类型可以使用for in 语法进行循环
++ 对于Map类型的遍历不能使用for in 但是可以使用自带的forEach语法
++ for循环中的break和continue
+  + break直接跳出循环
+  + continue跳出本次循环直接进入下次循环
++ 可迭代对象的where功能可以类似与Javascript中的filter函数，可以做过滤器
+
+~~~dart
+void main(){
+  // 循环
+  // 这里的var因为有死区的原因，所以有各自的作用域
+  // 因此和JS不一样会输出 1 2 而不是 2 2
+  var callbacks = [];
+  for (var i = 0; i < 2; i++) {
+    callbacks.add(() => print(i));
+  }
+  callbacks.forEach((c) => c());
+  // 0
+  // 1
+
+  // 对于可迭代类型可以使用forEach来进行迭代
+  // 使用forEach使用迭代的弊端是无法直接获得当前元素的索引值
+  var students = List.generate(
+      10, (i) => ({"name": 'students-$i', "score": Random().nextInt(100)}));
+
+  students.forEach(
+      (students) => print('${students["name"]}的分数是${students["score"]}'));
+    
+ /*
+ 	students-0的分数是32
+    students-1的分数是96
+    students-2的分数是92
+    students-3的分数是35
+    students-4的分数是96
+    students-5的分数是39
+    students-6的分数是78
+    students-7的分数是69
+    students-8的分数是80
+    students-9的分数是26
+ */
+
+  // 使用for in 语法对迭代器进行使用
+  // Set和List都可以使用for in来进行迭代
+  for (var stu in students) {
+    print(stu);
+  }
+  /*
+  	{name: students-0, score: 32}
+    {name: students-1, score: 96}
+    {name: students-2, score: 92}
+    {name: students-3, score: 35}
+    {name: students-4, score: 96}
+    {name: students-5, score: 39}
+    {name: students-6, score: 78}
+    {name: students-7, score: 69}
+    {name: students-8, score: 80}
+    {name: students-9, score: 26} 
+ */   
+  //使用for in对Map进行遍历
+  var collection = {"优秀": 1, "中等": 2, "不及格": 3};
+  collection.forEach((key, value) => print('$key 的人数为 $value 人'));
+  /*
+  	优秀 的人数为 1 人
+    中等 的人数为 2 人
+    不及格 的人数为 3 人
+  */
+    
+  // continue 和break的例子
+    
+  // 使用break直接跳出整个循环
+  // 使用continue跳出本次循环，直接进入下个循环
+  for (var stu in students) {
+    int _score = stu['score'];
+    if (_score < 20) {
+      print('出了个20分以下的,结束循环');
+      break;
+    }
+    if (_score < 85) {
+      continue;
+    }
+    print('${stu['name']}获得了优秀');
+  }
+  /*
+  	students-1获得了优秀
+    students-2获得了优秀
+    students-4获得了优秀
+  */
+    
+  // 对于迭代元素可以通过where方法来进行过滤
+    var goodStudent = students.where((stu) {
+        int score = stu['score'];
+        return score > 85;
+    });
+    print(goodStudent);
+  // ({name: students-1, score: 96}, {name: students-2, score: 92}, {name: students-4, score: 96})
+}
+~~~
+
+###### 3. while 和 do-while语法
+
++ while先判断再执行
++ do-while先执行再判断
+
+~~~dart
+  void main (){
+      // while 和doWhile语法
+      // while在循环前判断
+      // do-while循环后判断
+      var i = 0;
+      while (i < 10) {
+          i++;
+          print(i);
+      }
+
+      i = 0;
+      do {
+          i++;
+          print(i);
+      } while (i < 10);
+  }
+  // 输出结果均为1～10
+~~~
+
+###### 4. switch case 语法
+
+	+ 对于int, String 类型在编译阶段通过 == 来判断，完全一致的时候才执行
+	+ 对于class来说必须属于一个class构造出来的才行，不包括继承后的子类
+	+ case里面的逻辑可以省略，则该条case直接被略过
+	+ break不能被省略，否则flutter会报错
+	+ 在switch-case语法中使用continue,会直接跳过之后的逻辑，调到指定的锚点并继续执行
+
+~~~dart
+void main(){
+    // Switch-Case
+  	// 在判断的时候对于int, String类型在编译阶段通过==来进行判断，当值完全一致的时候才相同
+  	// 对于类来说必须具有完全的类函数才属于同一元素(不包括他的子类)
+    var degree = ['优秀', '良好', '合格', '不合格'][Random().nextInt(4)];
+    switch (degree) {
+            // case里面处理的逻辑可以省略，会自动被略过，不会报错
+        case '满分':
+        case '优秀':
+            print('90分以上');
+            // 这里continue会直接打断break，执行default;
+            continue fallThrough;
+            break;
+        case '良好':
+            print('80-90分');
+            break;
+        case '合格':
+            print('60分万岁');
+            // 如果没有break 会报错
+            break;
+            fallThrough:
+        default:
+            print('要打屁股拉');
+    }
+}
+~~~
 
