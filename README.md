@@ -1560,3 +1560,609 @@ void main(){
 }
 ~~~
 
+#### 4. Class的使用
+
+##### 1. 类的构造函数定义
+
+类的构造函数本质也是函数，因此其定义方式和函数的定义套路是一样的，有具名参数函数和位置参数函数这两种，另外还包括使用dart语法糖的形式。
+
+> 如果一个函数没有构造函数会怎么样？
+>
+>    如果不指定构造器的话，class会调用一个不带任何参数的默认构造器
+>    该构造器没有任何传参，并且在继承父类构造器的时候不会传参
+>    构造器不会被继承，当没有构造器，会调用默认的而不会继承父类的。
+>
+> 因此，如果继承了父类，父类构造函数中需要传参，而子类中没有使用构造函数，会报错！
+
+还有一个注意点：
+
+	+ 感觉： 在类中调用变量的时候按照作用域网上找，所以定义this.num 和num应该都会找到实例变量定义的num变量
+
+***上面这个感觉不一定对，但是从很多代码上来看是这样的，后面要仔细研究下***
+
+###### 1. 基本构造函数形式
+
+其本质**位置参数函数**作为构造函数
+
+~~~dart
+class Point {
+  // 定义函数内存在的变量和类型。
+  num x;
+  num y;
+  num z = 0;
+
+  // 函数的构造函数
+  // 利用构造函数，利用传入参数对类进行初始化
+  Point(num x, num y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+void main() {
+    var p = Point(1, 2);
+    p.x = 3;
+    print(p.z); // 0
+   	print(p.x); // 3
+}
+~~~
+
+###### 2. 利用具名参数函数构造函数
+
+~~~dart
+class Point4 {
+  num x, y;
+
+  Point4({num x, num y}) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+void main() {
+  var p4 = Point4(
+    x: 1,
+    y: 2
+  );
+  print('p4.x = ${p4.x}'); // 1
+}
+~~~
+
+###### 3. 利用dart自带语法糖简化位置函数构造函数的形式
+
+~~~dart
+class Point2 {
+  num x, y;
+
+  // dart提供的语法糖，将对应传入的值，赋值内内部对应的参数
+  Point2(this.x, this.y);
+}
+
+void main() {
+	var p2 = Point2(1, 2);
+}
+
+~~~
+
+###### 4. 使用冒号语法进行赋值
+
+~~~dart
+class Point3 {
+  num x, y;
+  double initDis;
+
+  // 可以直接通过冒号的方式对this.x, this.y进行赋值
+  Point3(x, y)
+      : x = x,
+        y = y,
+        initDis = sqrt(x * x + y * y);
+  // 其他方法定义
+  // ......
+}
+~~~
+
+###### 6. 使用具名构造器
+
+上面所有的构造器都是默认构造器，创建类的时候会默认执行构造器，但可能会有这种情况，希望**同样的类，但是在不同场景下具有不同的构造函数方法**，这样就需要一个具名构造器，可以对不同场景进行切换，对于相同的类进行**定制化**
+
+**继承具名构造器**
+
+具名构造器并不会被直接继承，默认调用的是父类中的默认构造器，因此，如果想要继承具名构造器，需要在子类中进行调用才行。
+
+~~~dart
+
+// 构造器是不会被继承的，所以父类的具名构造器也是不会被子类继承的
+// 如果要使用父类的具名构造器，需要在子类上进行调用
+class Point3 {
+  num x, y;
+  double initDis;
+
+  // 可以直接通过冒号的方式对this.x, this.y进行赋值
+  Point3(x, y)
+      : x = x,
+        y = y,
+        initDis = sqrt(x * x + y * y);
+
+  Point3.origin(num x, num y) {
+    this.x = x;
+    this.y = y;
+    this.initDis = sqrt(x * x + y * y);
+  }
+
+  Point3.xAxis(num x) : this.origin(x, 0);
+
+  getXYDistance() {
+    return sqrt(x * x + y * y);
+  }
+}
+
+// 具有具名构造器的父类继承过程
+// 默认情况下
+// 在继承的过程中，子类构造其调用父类非具名构造器
+// 父类非具名构造器，调用main class的非具名构造器
+class PointSubclass extends Point3 {
+  num x, y, z;
+
+  PointSubclass(this.x, this.y, this.z) : super.origin(x, y);
+  // 按照需要继承的父类的情况进行赋值和继承
+  PointSubclass.onlyXAxis(this.x) : super.xAxis(x);
+}
+
+void main () {
+  var p3 = Point3.origin(3, 4);
+  var cubicPoint = PointSubclass(1, 2, 3);
+  var xPoint = PointSubclass.onlyXAxis(10);
+
+  double dis = cubicPoint.getXYDistance();
+  print('只有x轴上的点：${xPoint.getXYDistance()}'); // 只有x轴上的点：10.0
+}
+~~~
+
+###### 7. 构造值不可变的class
+
+~~~dart
+// const constructor
+class ConstAdder {
+  final num x;
+
+  const ConstAdder(this.x);
+
+  getRes(num value) {
+    return this.x + value;
+  }
+}
+
+void main () {
+  var adder = ConstAdder(3);
+
+  print('adder.x = ${adder.x}');  // adder.x = 3
+  // 下面这句话会报错
+  // adder.x = 4;
+  print('add.Res = ${adder.getRes(10)}'); // add.Res = 13
+}
+
+~~~
+
+
+
+##### 2. 使用factory 进行构建class
+
+利用factory 创建class和利用构造函数创建class的区别，使用构造函数创建类，每次创建出来的个体都是一个独立的个体，factory每次创建出来的是同一个实例，主要通过具体的方法对内部变量修改而不会产生一个新的实例。
+
+factory构建class的步骤：
+
++ 在类的内部构建一个实例对象_instance
++ 使用factory关键字构造，调用具名构造函数，将结果赋值给对象实例_instance
+
+具体可以参见下面的例子：
+
+~~~dart
+// 使用工厂模式创建类的构造函数
+class Animal {
+  String type, name = '';
+  static Animal _instance;
+
+  Animal.getInstance(type, name) {
+    this.type = type;
+    this.name = name;
+  }
+
+  factory Animal(type, name) {
+    // 如果内部instance 存在就返回该实例就行，不用重新创建实例
+    if (_instance == null) {
+      _instance = Animal.getInstance(type, name);
+    }
+    return _instance;
+  }
+
+  changeType(type) {
+    _instance.type = type;
+  }
+
+  changeName(name) {
+    _instance.name = name;
+  }
+}
+
+void main() {
+  var a1 = Animal('aunt', '子弹蚁');
+  var a2 = Animal('elephant', '长毛象');
+
+  print(identical(a1, a2)); // true
+
+  print(a1.name); // 子弹蚁
+  print(a2.name); // 子弹蚁
+
+  a1.changeName('长毛象'); 
+  print(a1.name); // 长毛象
+  print(a2.name); // 长毛象
+
+}
+~~~
+
+为了对比， 我们看一个使用构造函数的例子，每次实例化都是一个新的对象。
+
+另外，这里介绍一个级联调用的用法，使用**..**运算符，使之后的在..内的元素都莫认为是obj.*，
+
+~~~dart
+class Chinese {
+  String name;
+  bool sex;
+  static const nation = "China";
+
+  Chinese(this.name, this.sex);
+}
+
+  var xiaoWange = Chinese('老王', true);
+  var xiaoLi = Chinese('老李', true);
+
+  print('identity = ${identical(xiaoWange, xiaoLi)}'); // identity = false
+
+  xiaoWange
+    ..name = '小王'
+    ..sex = true
+    ..showSex();
+~~~
+
+
+
+##### 3. 类方法和变量
+
+###### 1. 静态方法和静态变量
+
+之前定义的方法和变量，均是**实例变量和方法**，因为其本身需要在对象被实例化后，才能调用修改查询。类的静态方法和静态变量指的是，在不实例化对象的前提下，就能调用和查询，定义方法也很简单：使用**static**关键字
+
+~~~dart
+
+class Person {
+  String name;
+  bool sex;
+
+  static num maxAge = 120;
+
+  static void getMaxAge() {
+    print('人的最大寿命为$maxAge');
+  }
+
+  Person(this.name, this.sex);
+  // 实例方法的定义办法
+  // 实例化对象后生效
+  showSex() {
+    print('${this.name} 是一个 ${sex ? "男性" : "女性"}');
+  }
+}
+
+void main() {
+    
+  // 使用类的静态方法和静态变量
+
+  print(Person.maxAge); // 120
+  Person.getMaxAge(); // 人的最大寿命为120
+}
+~~~
+
+###### 2. get和set方法
+
+在dart的class的定义中，除了我们定义的方法变量外，对于变量的赋值和查询其是内部有set和get的语法，在对变量赋值和查询的时候会使用这两个方法，通过定义set和get方法，可以对变量变化的过程中采用回调。
+
+注意点：
+
++ set方法后的变量应该是之前没有申明过的变量，比如要更改radius，应该是写成set _radius,就是这个\_radius和要对应修改的函数名不能一样，然后在调用set的函数的时候对radius变量进行赋值
+
+~~~dart
+// 类方法
+// 上述定义的方法均为实例方法
+// 在实例化对象后可以通过.进行调用
+// get set方法
+
+class Circle {
+  num dx, dy, radius;
+
+  Circle(this.dx, this.dy, this.radius);
+
+  dynamic get circleOrigin => {"dx": this.dx, "dy": this.dy};
+
+  set circleOrigin(value) {
+    this.radius = sqrt(value / pi);
+  }
+    
+  set customRadius(value) {
+    print('radius change $value');
+    radius = value;
+  }
+
+  num getArea() {
+    return pi * radius * radius;
+  }
+}
+
+void main (){
+  var c1 = Circle(10, 10, 30);
+
+  print('radis = ${c1.radius}'); // radis = 30
+  print('area = ${c1.getArea()}'); // area = 2827.4333882308138
+
+  c1.circleOrigin = 10;
+  c1.customRadius = 11;
+  print(c1.radius); 
+  /*
+  	radius change 11
+	11
+  */
+}
+~~~
+
+
+
+##### 4. 类的类型
+
+###### 1. 抽象类
+
+抽象类的作用： 抽象类只提供该类的子类的接口，其本身不能被实例化，就相当于给子类一个**模板！**
+
+注意点：
+
+	+ 子类理论上需要实现所有抽象类定义的方法，不然汇报错
+	+ 如果对部分方法不需要实现，可以使用override覆盖默认的noSuchMethod解决
+
+~~~dart
+// 抽象类，抽象类很多时候只是定义一个类的接口类型
+// 便于后续的类进行定义
+abstract class Lesson {
+    String lessonName, teacher;
+
+    void printLessonInfo();
+    void changeTeacher(String teacher);
+    void expandedFunc();
+}
+
+class Math extends Lesson {
+    String teacher;
+    final String lessonName = 'Math';
+
+    Math(this.teacher);
+
+    void printLessonInfo() {
+        print('${this.teacher}是教${this.lessonName}');
+    }
+
+    // 这里如果不定义changeTeacher方法会报错
+    // 因为在抽象类上已经定义了必须有的接口类型
+    void changeTeacher(String teacher) {
+        this.teacher = teacher;
+    }
+
+    void callTeacher() {
+        print('${this.teacher} is on the way');
+    }
+    
+    // 不想定义expandedFunc
+    // 重写noSuchMethod
+    @override
+    dynamic noSuchMethod(Invocation invocation) {
+        print('${invocation.memberName} is not existed');
+    }
+}
+
+void main() {
+    var math = Math('tony');
+    math.printLessonInfo(); // tony是教Math
+    math.callTeacher(); // tony is on the way
+    math.expandedFunc(); // Symbol("expandedFunc") is not existed
+}
+~~~
+
+
+
+###### 2. 枚举类
+
+使用enum进行枚举，之后可以通过obj.values查询枚举类的信息,obj.index查询枚举类的索引值
+
+~~~dart
+// 官网的一个例子
+enum Color { red, green, blue }
+
+void main() {
+    List<Color> colors = Color.values;
+    print(colors); // [Color.red, Color.green, Color.blue]
+}
+~~~
+
+
+
+##### 5. 类的继承
+
+类的继承有两种：
+
++ extends: 继承父类的所有API和实现
++ implements: 只继承父类的API, 并不继承其实现
+
+###### 1. extends继承
+
++ 调用父类的默认构造函数，在子类构造函数后跟:super(param)
++ 如果调用的是父类的具名构造函数，需要:super.func(param)
++ 如果需要重写父类方法，建议是通过override进行覆写，通过override可以继承父类的传参顺序和类型，更便于管理
++ 直接进行同名函数的覆盖也可以，而且可以传参类型都不一样，灵活性更大，但是会造成代码混乱
+
+~~~dart
+// 方法的覆盖override
+// 继承了父类该方法的参数列表等
+// 如果直接重写不用override可以各种定义参数过程
+// 但是容易造成代码混乱，不推荐
+class Dog extends Animal {
+  String name;
+  final String type = 'dog';
+
+  Dog(this.name) : super.getInstance('dog', name);
+  void bark() {
+    print('Wang Wang');
+  }
+
+  void shouldBark() {
+    this.bark();
+  }
+}
+
+
+class Kely extends Dog {
+  String name;
+
+  Kely(this.name) : super(name);
+
+  @override
+  void bark() {
+    print('汪汪');
+  }
+}
+
+// 使用具名函数继承的例子
+class PointSubclass extends Point3 {
+  num x, y, z;
+
+  PointSubclass(this.x, this.y, this.z) : super.origin(x, y);
+  // 按照需要继承的父类的情况进行赋值和继承
+  PointSubclass.onlyXAxis(this.x) : super.xAxis(x);
+}
+
+void main(){
+    var testDog = Kely('测试犬');
+    testDog.shouldBark(); // 汪汪
+}
+~~~
+
+###### 2. Implements继承
+
++ 本身不带构造函数，继承父类所有的API，但是不继承实现
++ 需要复写父类中的所有方法，不然会报错
++ 可以继承多个父类
+
+~~~dart
+class Person {
+  String name;
+  bool sex;
+
+  static num maxAge = 120;
+
+  static void getMaxAge() {
+    print('人的最大寿命为$maxAge');
+  }
+
+  Person(this.name, this.sex);
+
+  showSex() {
+    print('${this.name} 是一个 ${sex ? "男性" : "女性"}');
+  }
+}
+
+class YelloPeople {
+  String skinColor = 'yellow';
+
+  void setSkinColor(value) {
+    skinColor = value;
+  }
+}
+
+class Asian implements Person, YelloPeople {
+  String name;
+  bool sex;
+  String skinColor;
+
+  showSex() {
+    print('新的showSex方法 $name 是 $sex');
+  }
+
+  setSkinColor(value) {
+    skinColor = value;
+  }
+
+  haveFun() {
+    print('$name have fun');
+  }
+}
+~~~
+
+###### 3. 使用mixin混入
+
+mixin的出现主要是为了，让几个类能够共同使用一些方法，使这些方法能够共用，一个类能够使用多个mixin方法
+
+使用方法：
+
+ + 定义共用方法mixin
+   	+ mixin方法中需要用到的变量在mixin方法中写出，之后可以通过调用的父类作用域改变的
+   	+ 之后就该写函数方法写函数方法就阿好了
+	+ 在定义类的时候最后通过with关键字将类与mixin方法连接
+	+ 在构造函数中对mixin方法中的变量进行初始化
+
+~~~dart
+import 'package:meta/meta.dart';
+
+mixin Musical {
+  bool canPlayPiano = false;
+  bool canCompose = false;
+  bool canConduct = false;
+
+  String myName();
+
+  void entertainMe() {
+    if (canPlayPiano) {
+      print('Playing piano');
+    } else if (canConduct) {
+      print('Waving hands');
+    } else {
+      print('${this.myName()} Humming to self');
+    }
+  }
+}
+
+// 带有mixin的继承的一个例子
+class Maestro extends Person with Musical {
+  String name;
+  bool sex;
+  bool canPlayPiano = false;
+  bool canCompose = false;
+  bool canConduct = false;
+
+  String myName() => this.name;
+
+  Maestro({@required name, @required sex, canPlayPiano, canCompose, canConduct})
+      : super(name, sex) {
+    this.name = name;
+    this.sex = sex;
+    this.canPlayPiano = canPlayPiano ?? false;
+    this.canCompose = canCompose ?? false;
+    this.canConduct = canConduct ?? false;
+  }
+}
+
+void main() {
+    var singer1 = Maestro(name: '张三', sex: false, canConduct: true);
+
+    singer1.showSex(); // 张三 是一个 女性
+    singer1.entertainMe(); // Waving hands
+    
+}
+
+~~~
+
+
+
