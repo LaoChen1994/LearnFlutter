@@ -2109,7 +2109,7 @@ mixin的出现主要是为了，让几个类能够共同使用一些方法，使
 
  + 定义共用方法mixin
    	+ mixin方法中需要用到的变量在mixin方法中写出，之后可以通过调用的父类作用域改变的
-   	+ 之后就该写函数方法写函数方法就阿好了
+      	+ 之后就该写函数方法写函数方法就阿好了
 	+ 在定义类的时候最后通过with关键字将类与mixin方法连接
 	+ 在构造函数中对mixin方法中的变量进行初始化
 
@@ -2165,4 +2165,604 @@ void main() {
 ~~~
 
 
+
+### 3. Flutter有状态组件和组件通信
+
+##### 0. 一个计算器的简单例子
+
+**再学习过程中在本例子中用到了几个注意点进行笔记：**
+
+1. Flutter有状态组件的定义方法
+2. Flutter子组件和父组件之间的通信过程
+3. 动态组件生成的方法
+4. 关于定义回调函数类型上碰到的写法问题
+
+**实现效果**：
+
+![](/home/czx/Desktop/Learn/Flutter/img/demo.gif)
+
+##### 1. Flutter有状态组件的定义
+
++ 创建一个类(有状态组件)，该类用于继承StatefullWidget
++ 在有状态组件中覆写createState方法，并且返回一个继承了State的组件
++ 在State组件中写业务代码
+
+##### 2. State组件中的状态改变
+
++ 先在类中定义实例变量
++ 当需要发生变化的时候调用setState方法即可
++ 当调用setState方法的时候，flutter会重新运行对应State组件中的build方法
+
++ 代码实现
+
+~~~dart
+// 有状态组件Calculator的定义
+// 1. 定义一个继承StatefulWidget的组件
+class Calculator extends StatefulWidget {
+  final num initX, initY;
+  Calculator({Key key, @required this.initX, @required this.initY})
+      : super(key: key);
+
+  // 2. 重写其中的createState方法
+  // 返回一个该组件的State组件
+  // 该函数返回_CalculatorState的类
+  @override
+  _CalculatorState({Key key, @required this.initX, @required this.initY});
+}
+
+// 该组件继承State，且其泛型设为对应的statefulWidget类型
+// 下面写对应的功能函数即可
+class _CalculatorState extends State<Calculator> {
+  // 参数的初始化
+  num initX = 0, initY = 0, result;
+  String _operator = "+";
+  bool setY = false;
+  static final suppoerOperator = ['+', '-', '*', '/'];
+  
+  // 对应的构造函数
+  _CalculatorState({Key key}); 
+
+  void calRes() {
+    // 需要重新设置参数的时候
+    // 通过setState设置对应参数值
+    setState(() {
+      switch (_operator) {
+        case "+":
+          result = initX + initY;
+          break;
+        case "-":
+          result = initX - initY;
+          break;
+        case "*":
+          result = initX * initY;
+          break;
+        case "/":
+          result = initX / initY;
+          break;
+        default:
+      }
+    });
+    // 下面的功能代码先省略
+  }
+
+~~~
+
+##### 3. 父组件传参过程
+
++ 通过传参的方式进行，当父组件对应参数变化的时候，会重新渲染子组件
++ 最好采用具名函数写构造函数，这样传参的时候比较清楚，具体的可参考
+
+~~~dart
+// 前面代码省略，定义了头部的计算模块
+// 因为这个组件除了
+class EqualInput extends StatelessWidget {
+  // 这些参数需要通过父组件传入
+  final num initX, initY, result;
+  final String op;
+
+  // 这里采用具名构造函数的声明方法
+  const EqualInput(
+      {Key key,
+      @required this.initY,
+      @required this.initX,
+      @required this.result,
+      @required this.op})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$initX',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 2),
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$op',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 1),
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$initY',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 2),
+          Text(
+            '=',
+            style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+          ),
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$result',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 2),
+        ],
+      ),
+    );
+  }
+}
+
+~~~
+
+
+
+##### 4. 子组件向父组件传参
+
++ 方法和React类似，就是通过父组件向子组件传递一个回调函数，然后子组件通过回调函数返回值，或者控制父组件中参数的变化，类似于父组件中的参数集中管理
+  + **传递过程:**  父元素回调-> 子组件 -> 子组件产生事件 -> 父元素回调接受子组件回调 -> 做了操作 -> 更新State -> 重新渲子组件
+
+~~~dart
+
+class _CalculatorState extends State<Calculator> {
+  // ......省略了上面部分代码，只留下相关重要的代码
+
+  Function getData(num value) {
+    return () {
+      setState(() {
+        !setY
+            ? initX = int.parse(initX.toString() + value.toString())
+            : initY = int.parse(initY.toString() + value.toString());
+      });
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: Container(
+      child: Column(
+        children: <Widget>[
+          // 省略上面的组件，只看KeyBoard组件
+          KeyBoard(onChange: getData),
+        ],
+        crossAxisAlignment: CrossAxisAlignment.center,
+      ),
+    ));
+  }
+}
+
+class KeyBoard extends StatelessWidget {
+  final Function onChange;
+
+  const KeyBoard({Key key, @required this.onChange}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> numberKey = List.generate(9, (i) => i + 1)
+        .map((item) => RaisedButton(
+              // 这里通过在父元素的回调中传回item
+              // 父元素就可以接下来通过回传的item参数作出相应的操作
+              onPressed: onChange(item),
+              child: Center(
+                child: Text(
+                  '$item',
+                  style: TextStyle(fontSize: 64, color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              color: Colors.green[200],
+            ))
+        .toList();
+
+    return Flexible(
+      child: Container(
+        child: GridView(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 5.0,
+                mainAxisSpacing: 10.0,
+                childAspectRatio: 1),
+            children: numberKey),
+        margin: EdgeInsets.all(10),
+      ),
+      flex: 1,
+    );
+  }
+}
+~~~
+
+
+
+##### 5. 通过列表对象批量生成Widget
+
++ 使用map方法
+  + map方法中通常只有对应List的值，因此如果希望用到元素对应的索引值需要使用List.index方法获得对应的索引值
+
+~~~dart
+    final List<Widget> numberKey = List.generate(9, (i) => i + 1)
+        .map((item) => RaisedButton(
+              onPressed: onChange(item),
+              child: Center(
+                child: Text(
+                  '$item',
+                  style: TextStyle(fontSize: 64, color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              color: Colors.green[200],
+            ))
+        .toList();
+~~~
+
+
+
+##### 6. 关于回调函数的类型定义
+
+一般函数的定义方法，因为函数返回值也是对象，所以直接定义函数返回值的类型作为函数类型即可
+
+如果函数的返回值还是函数，可以通过下面的方法解决, 因为返回的是一个没有参数的函数，Function即可，通过闭包的方式实现后续功能
+
+~~~dart
+class _CalculatorState extends State<Calculator> {
+  // ......省略了上面部分代码，只留下相关重要的代码
+  // 返回值类型为function
+  Function getData(num value) {
+    return () {
+      setState(() {
+        !setY
+            ? initX = int.parse(initX.toString() + value.toString())
+            : initY = int.parse(initY.toString() + value.toString());
+      });
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: Container(
+      child: Column(
+        children: <Widget>[
+          // 省略上面的组件，只看KeyBoard组件
+          KeyBoard(onChange: getData),
+        ],
+        crossAxisAlignment: CrossAxisAlignment.center,
+      ),
+    ));
+  }
+}
+
+class KeyBoard extends StatelessWidget {
+  final Function onChange;
+
+  const KeyBoard({Key key, @required this.onChange}) : super(key: key);
+}
+~~~
+
+##### 7. 完整代码
+
+~~~dart
+import "package:flutter/material.dart";
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: MaterialApp(
+      title: '计算器',
+      theme: ThemeData(primaryColor: Colors.red),
+      home: Scaffold(
+          appBar: AppBar(
+            title: Text('计算器'),
+          ),
+          body: Calculator(initX: 0, initY: 0)),
+    ));
+  }
+}
+
+class Calculator extends StatefulWidget {
+  final num initX, initY;
+  Calculator({Key key, @required this.initX, @required this.initY})
+      : super(key: key);
+
+  @override
+  _CalculatorState createState() => _CalculatorState(initX: initX, initY: initY);
+}
+
+class _CalculatorState extends State<Calculator> {
+  num initX, initY, result;
+  String _operator = "+";
+  bool setY = false;
+  static final suppoerOperator = ['+', '-', '*', '/'];
+
+  _CalculatorState({Key key, @required this.initX, @required this.initY});
+
+  Function getData(num value) {
+    return () {
+      setState(() {
+        !setY
+            ? initX = int.parse(initX.toString() + value.toString())
+            : initY = int.parse(initY.toString() + value.toString());
+      });
+    };
+  }
+
+  void calRes() {
+    setState(() {
+      switch (_operator) {
+        case "+":
+          result = initX + initY;
+          break;
+        case "-":
+          result = initX - initY;
+          break;
+        case "*":
+          result = initX * initY;
+          break;
+        case "/":
+          result = initX / initY;
+          break;
+        default:
+      }
+    });
+  }
+
+  Function handleOperator(String _op) {
+    return () {
+      if (suppoerOperator.contains(_op) && !setY) {
+        setState(() {
+          _operator = _op;
+          setY = true;
+        });
+      }
+      if (_op == '=') {
+        calRes();
+        setState(() {
+          setY = false;
+        });
+      }
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<Widget> operatorList = ['+', '-', '*', '/', '=']
+        .map(
+          (item) => Flexible(
+              child: Container(
+                child: RaisedButton(
+                  onPressed: handleOperator(item),
+                  child: Text(
+                    '$item',
+                    style: TextStyle(color: Colors.red, fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                  color: Colors.greenAccent,
+                ),
+                margin: EdgeInsets.fromLTRB(
+                    suppoerOperator.indexOf(item) == 0 ? 0 : 10, 0, 0, 0),
+              ),
+              flex: 1),
+        )
+        .toList();
+
+    return Center(
+        child: Container(
+      child: Column(
+        children: <Widget>[
+          EqualInput(initY: initY, initX: initX, result: result, op: _operator),
+          Container(
+            height: 30,
+            child: Row(
+              children: operatorList,
+              crossAxisAlignment: CrossAxisAlignment.center,
+            ),
+            margin: EdgeInsets.all(10),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Container(
+                child: RaisedButton(
+                  child: Text(
+                    '清空',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      initY = 0;
+                      initX = 0;
+                      result = 0;
+                      _operator = '+';
+                      setY = false;
+                    });
+                  },
+                  color: Colors.green,
+                ),
+                margin: EdgeInsets.only(right: 10),
+              )
+            ],
+          ),
+          KeyBoard(onChange: getData),
+        ],
+        crossAxisAlignment: CrossAxisAlignment.center,
+      ),
+    ));
+  }
+}
+
+class KeyBoard extends StatelessWidget {
+  final Function onChange;
+
+  const KeyBoard({Key key, @required this.onChange}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> numberKey = List.generate(9, (i) => i + 1)
+        .map((item) => RaisedButton(
+              onPressed: onChange(item),
+              child: Center(
+                child: Text(
+                  '$item',
+                  style: TextStyle(fontSize: 64, color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              color: Colors.green[200],
+            ))
+        .toList();
+    
+    return Flexible(
+      child: Container(
+        child: GridView(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 5.0,
+                mainAxisSpacing: 10.0,
+                childAspectRatio: 1),
+            children: numberKey),
+        margin: EdgeInsets.all(10),
+      ),
+      flex: 1,
+    );
+  }
+}
+
+class EqualInput extends StatelessWidget {
+  final num initX, initY, result;
+  final String op;
+
+  const EqualInput(
+      {Key key,
+      @required this.initY,
+      @required this.initX,
+      @required this.result,
+      @required this.op})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$initX',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 2),
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$op',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 1),
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$initY',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 2),
+          Text(
+            '=',
+            style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+          ),
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$result',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 2),
+        ],
+      ),
+    );
+  }
+}
+
+~~~
+
+**如果你看到了这里，我想说，很感谢你花了这么多时间来看这个，辛苦你了。**
 

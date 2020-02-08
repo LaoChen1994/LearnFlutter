@@ -2,8 +2,6 @@ import "package:flutter/material.dart";
 
 void main() => runApp(MyApp());
 
-typedef numCallBack = Function Function(num);
-
 class MyApp extends StatelessWidget {
   const MyApp({Key key}) : super(key: key);
 
@@ -28,18 +26,18 @@ class Calculator extends StatefulWidget {
       : super(key: key);
 
   @override
-  _CalculatorState createState() => _CalculatorState();
+  _CalculatorState createState() => _CalculatorState(initX: initX, initY: initY);
 }
 
 class _CalculatorState extends State<Calculator> {
-  num initX = 0, initY = 0, result;
+  num initX, initY, result;
   String _operator = "+";
   bool setY = false;
   static final suppoerOperator = ['+', '-', '*', '/'];
 
-  _CalculatorState({Key key});
+  _CalculatorState({Key key, @required this.initX, @required this.initY});
 
-  VoidCallback getData(num value) {
+  Function getData(num value) {
     return () {
       setState(() {
         !setY
@@ -112,63 +110,7 @@ class _CalculatorState extends State<Calculator> {
         child: Container(
       child: Column(
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                  child: Container(
-                    child: Text(
-                      '$initX',
-                      textAlign: TextAlign.center,
-                    ),
-                    decoration: BoxDecoration(
-                        border: Border.all(width: 1, color: Colors.red),
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.all(10),
-                  ),
-                  flex: 2),
-              Expanded(
-                  child: Container(
-                    child: Text(
-                      '$_operator',
-                      textAlign: TextAlign.center,
-                    ),
-                    decoration: BoxDecoration(
-                        border: Border.all(width: 1, color: Colors.red),
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.all(10),
-                  ),
-                  flex: 1),
-              Expanded(
-                  child: Container(
-                    child: Text(
-                      '$initY',
-                      textAlign: TextAlign.center,
-                    ),
-                    decoration: BoxDecoration(
-                        border: Border.all(width: 1, color: Colors.red),
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.all(10),
-                  ),
-                  flex: 2),
-              Text('='),
-              Expanded(
-                  child: Container(
-                    child: Text(
-                      '$result',
-                      textAlign: TextAlign.center,
-                    ),
-                    decoration: BoxDecoration(
-                        border: Border.all(width: 1, color: Colors.red),
-                        borderRadius: BorderRadius.all(Radius.circular(10))),
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.all(10),
-                  ),
-                  flex: 2),
-            ],
-          ),
+          EqualInput(initY: initY, initX: initX, result: result, op: _operator),
           Container(
             height: 30,
             child: Row(
@@ -192,6 +134,7 @@ class _CalculatorState extends State<Calculator> {
                       initX = 0;
                       result = 0;
                       _operator = '+';
+                      setY = false;
                     });
                   },
                   color: Colors.green,
@@ -209,7 +152,7 @@ class _CalculatorState extends State<Calculator> {
 }
 
 class KeyBoard extends StatelessWidget {
-  final numCallBack onChange;
+  final Function onChange;
 
   const KeyBoard({Key key, @required this.onChange}) : super(key: key);
 
@@ -228,7 +171,7 @@ class KeyBoard extends StatelessWidget {
               color: Colors.green[200],
             ))
         .toList();
-
+    
     return Flexible(
       child: Container(
         child: GridView(
@@ -241,6 +184,89 @@ class KeyBoard extends StatelessWidget {
         margin: EdgeInsets.all(10),
       ),
       flex: 1,
+    );
+  }
+}
+
+class EqualInput extends StatelessWidget {
+  final num initX, initY, result;
+  final String op;
+
+  const EqualInput(
+      {Key key,
+      @required this.initY,
+      @required this.initX,
+      @required this.result,
+      @required this.op})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$initX',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 2),
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$op',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 1),
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$initY',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 2),
+          Text(
+            '=',
+            style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+          ),
+          Expanded(
+              child: Container(
+                child: Text(
+                  '$result',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red[200], fontSize: 16.0),
+                ),
+                decoration: BoxDecoration(
+                    border: Border.all(width: 1, color: Colors.red),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                padding: EdgeInsets.all(10),
+                margin: EdgeInsets.all(10),
+              ),
+              flex: 2),
+        ],
+      ),
     );
   }
 }
