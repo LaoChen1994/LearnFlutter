@@ -26,7 +26,8 @@ class Calculator extends StatefulWidget {
       : super(key: key);
 
   @override
-  _CalculatorState createState() => _CalculatorState(initX: initX, initY: initY);
+  _CalculatorState createState() =>
+      _CalculatorState(initX: initX, initY: initY);
 }
 
 class _CalculatorState extends State<Calculator> {
@@ -171,7 +172,7 @@ class KeyBoard extends StatelessWidget {
               color: Colors.green[200],
             ))
         .toList();
-    
+
     return Flexible(
       child: Container(
         child: GridView(

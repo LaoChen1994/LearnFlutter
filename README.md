@@ -2179,7 +2179,7 @@ void main() {
 
 **实现效果**：
 
-![](/home/czx/Desktop/Learn/Flutter/img/demo.gif)
+![](./img/demo.gif)
 
 ##### 1. Flutter有状态组件的定义
 
@@ -2765,4 +2765,477 @@ class EqualInput extends StatelessWidget {
 ~~~
 
 **如果你看到了这里，我想说，很感谢你花了这么多时间来看这个，辛苦你了。**
+
+
+
+### 4. 路由导航和包管理
+
+这次学习笔记主要有一下几个部分
+
++ 路由导航
+  + 简单路由
+  + 路由表导航
+  + 路由传参
+  + 路由参数回流
++ 包管理
+  + 本地组件引用
+  + 外部包引用
+  + 构建本地包并引用
+
+#### 1. 路由导航
+
+导航实现页面的切换，在Flutter中实现路由切换包括非具名路由和具名路由两种，如果是非具名路由需要指定具体到的路由组件(通常是一个页面),具名路由通常使用路由表构建的，建立了路由和页面组件之间一一对应的关系，接下来是具体实现。
+
+##### 1. 简单路由
+
+> 简单路由主要通过Navigator.push来实现
+>
+> *static* Future**<**T**>** push<T extends Object**>**(BuildContext context, Route**<**T**>** route) 
+
++ 定义一个新页面的组件
++ 使用Navigator.push方法指定到特定的页面
++ 第二个参数通过MaterialPageRoute进行页面导航
+
+**定义一个路由页面组件**
+
+~~~dart
+class Counter extends StatefulWidget {
+  Counter({Key key}) : super(key: key);
+
+  @override
+  _CounterState createState() => _CounterState();
+}
+
+class _CounterState extends State<Counter> {
+  int _count = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(children: <Widget>[
+        Text('现在的数字是$_count'),
+        FlatButton(
+          onPressed: () {
+            setState(() {
+              ++_count;
+            });
+          },
+          child: Text('按我++'),
+          color: Colors.red,
+        )
+      ]),
+    );
+  }
+}
+~~~
+
+**其他页面通过Navigator进行路由**
+
+~~~dart
+class NextRoute extends StatelessWidget {
+  const NextRoute({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Next Route'),
+      ),
+      body: Center(
+          child: Column(children: <Widget>[
+        Text('自定义的Route包'),
+        RaisedButton(
+          onPressed: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => Counter()));
+          },
+          child: Text('简单路由'),
+        )
+      ])),
+    );
+  }
+}
+~~~
+
+##### 2. 使用路由表
+
+路由表定义方法:
+
++ 定义路由页面
+
++  MaterialApp中的routes中以Map<String, Function>的形式定义路由表
++ 页面跳转的时候使用pushNamed进行路由链接
+
+~~~dart
+  static Future<T> pushNamed<T extends Object>(
+    BuildContext context,
+    String routeName, {
+    Object arguments,
+   }) {
+    return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
+  }
+~~~
+
+直接使用pushNamed会调用Navigator.of(context).pushNamed，因此我们也可以直接使用Navigator.of来进行路由跳转
+
+**代码实现**
+
+**路由表定义**
+
+使用MaterialApp的routes字段
+
+~~~dart
+class HomePage extends StatelessWidget {
+  const HomePage({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    List<Message> list =
+        List.generate(20, (i) => Message('我是信息$i, 读完给我回个信息', '广告商人', '重要信息$i'));
+    return MaterialApp(
+      title: 'Center Message',
+      home: MessageCenter(messageList: list),
+      routes: {
+        "home": (context) => MessageCenter(messageList: list),
+        "route1": (context) => NewRoute(),
+        "route2": (context) => NewRoute2(),
+        "route3": (context) => Route3.NextRoute(),
+        "route4": (context) => Route4.NextRoute(),
+        "route4/counter": (context) => Route4.Counter()
+      },
+      onGenerateRoute: (RouteSettings settings) {
+        return MaterialPageRoute(builder: (context) {
+          print(
+              'settings name = ${settings.name}， arguements=${settings.arguments}');
+          return NewRoute2();
+        });
+      },
+    );
+  }
+}
+~~~
+
+**利用路由表导航**
+
+点击按钮后会自动路由到route1的页面
+
+~~~dart
+// 省略上下文代码
+RaisedButton(
+    onPressed: () {
+        Navigator.pushNamed(context, 'route1');
+    },
+    child: Text('去路由页面1'),
+),
+~~~
+
+##### 3. 路由传参
+
+**非具名路由传参**，主要通过函数类传参的方式，在调用时候传参，然后将对应的参数直接拿来用就好了
+
+~~~dart
+// 定义组件
+class WithParam extends StatelessWidget {
+  final String text;
+  const WithParam({Key key, @required this.text}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('代参路由'),
+        ),
+        body: Text('$text'),
+      ),
+    );
+  }
+}
+
+~~~
+
+**传参调用**
+
+~~~dart
+// 在路由调用该类的时候传参
+RaisedButton(
+    onPressed: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return WithParam(
+                text: '显示Param',
+            );
+        }));
+    },
+    child: Text('显示Param'),
+)
+~~~
+
+**路由表传参**
+
++ 组件中通过ModalRoute.of(context).settings.arguments来获得通过路由传递的参数
++ 调用的时候通过Navigator.of(context).pushNamed(Widget(), arguments: param)， 将参数加到路由上
+
+**定义组件**
+
+~~~dart
+class NewRoute2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    dynamic args = ModalRoute.of(context).settings.arguments;
+    DateTime newTime;
+
+    Function getNewTime(DateTime time) {
+      return () {
+        newTime = time;
+      };
+    }
+
+    print(args);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('路由页面2'),
+      ),
+      body: Center(
+        child: Center(
+            child: Column(
+          children: <Widget>[
+            Text('用户名: ${args['name']}'),
+            Text('生日: ${args['birth']}'),
+            Text('喜好: ${args['hobby'] ?? '没有兴趣'}'),
+            RaisedButton(
+              onPressed: () {
+                Navigator.pop(context, "这是pop的信息1");
+              },
+              child: Text('Pop 信息1'),
+            ),
+            RaisedButton(
+              onPressed: () {
+                Navigator.pop(context, '这是pop的信息2');
+              },
+              child: Text('Pop 信息2'),
+            ),
+            PickTime(
+              onChange: getNewTime,
+            )
+          ],
+        )),
+      ),
+    );
+  }
+}
+
+// 将参数传递继承到路由表中
+// 通过这种方法需要在NewRoute2中添加变量text
+// 之后通过text来完成后面的逻辑
+routes: {
+    "home": (context) => MessageCenter(messageList: list),
+    "route1": (context) => NewRoute(),
+    "route2": (context) => NewRoute2(text: ModalRoute.of(context).settings.arguments),
+    "route3": (context) => Route3.NextRoute(),
+    "route4": (context) => Route4.NextRoute(),
+    "route4/counter": (context) => Route4.Counter()
+}
+~~~
+
+**带参的路由跳转**
+
+通过pushNamed的arguments参数会将参数注册到Context中，之后通过context中的setting即可完成后面的操作了
+
+~~~dart
+RaisedButton(
+    onPressed: () async {
+        Navigator.of(context)
+            .pushNamed('route2', arguments: userInfo)
+            .then((reply) {
+                return showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                        return AlertDialog(
+                            title: Text('回传内容'),
+                            content: Text('$reply'),
+                        );
+                    });
+            });
+    },
+    child: Text('去路由页面2'),
+)
+
+~~~
+
+##### 4. 路由参数回流
+
+有些业务场景比如点击打开表单或者选择选择一些东西，之后需要将选择的内容传回第一个页面中，这种场景的话，需要路由得到的参数能够回流到之前的页面的这种应用
+
+**非路由表路由传参**
+
+~~~dart
+static Future<T> push<T extends Object>(BuildContext context, Route<T> route) {
+    return Navigator.of(context).push(route);
+}
+
+Future<T> pushNamed<T extends Object>(
+    String routeName, {
+        Object arguments,
+    }) {
+    return push<T>(_routeNamed<T>(routeName, arguments: arguments));
+}
+~~~
+
+push和pushNamed方法本身是一个Future，类似于Promise，通过类似async/await语法可以得到结果,也可以通过.then方法得到结果
+
++ async和await回调函数的例子
+
+~~~dart
+  _navigateWithParam(BuildContext context, Message message) async {
+    final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => MessageDetail(
+                  message: message,
+                )));
+    print(result);
+  }
+~~~
+
++ 使用.then的例子
+
+~~~dart
+Navigator.of(context)
+    .pushNamed('route2', arguments: userInfo)
+    .then((reply) {
+        return showDialog(
+            context: context,
+            builder: (BuildContext context) {
+                return AlertDialog(
+                    title: Text('回传内容'),
+                    content: Text('$reply'),
+                );
+            });
+    });
+~~~
+
+上面这段和下面这个实现效果相同
+
+~~~dart
+onPressed: () async {
+
+    var reply = await Navigator.of(context)
+        .pushNamed('route2', arguments: userInfo);
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+            return AlertDialog(
+                title: Text('回传内容'),
+                content: Text('$reply'),
+            );
+        });
+},
+~~~
+
+#### 2. 包管理
+
+##### 1. 引用本地组件
+
+![](./img/Selection_014.png)
+
+想要在main.dart中调用nextRoute.dart的文件
+
+使用下面这两个办法都行
+
+~~~dart
+import './nextRoute.dart' as Route3;
+import 'package:navigator/nextRoute.dart' show NextRoute;
+~~~
+
++ 通过as 改变该包的名称，之后通过Route3.componentName来调用对应组件模块
++ 通过show来实现部分导入，这里通过第二条导入语句只导入NextRoute这一个组件
+
+##### 2. 调用外部包
+
+dart的包管理主要通过pubspec.yaml文件，通过配置该文件之后通过 flutter package get会自动获取类似依赖，使用办法
+
++ 换源，为了保证速度建议换源
+
+  > ```
+  > export PUB_HOSTED_URL=https://pub.flutter-io.cn
+  > export FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
+  > ```
+
++ 配置yaml文件
+
+  + name为该包的名称
+  + description是描述
+  + environment是运行环境
+  + version版本号
+
+  上面的主要对外部发布的包比较重要，如果是项目中应用，我们只需要设置dependecies即可，输入对应依赖的版本号即可
+
+  **国内查询包的地址：[flutter镜像站](https://pub.flutter-io.cn/)**
+
+**使用示例**
+
++ 找到flutter_dateTime_picker
+
+![](./img/Selection_015.png)
+
++ 编写dependencies
+
+![](./img/Selection_016.png)
+
++ 保存文件后，会自动收集依赖，依赖收集成功后通过文件即可导入
+
+~~~dart
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+class PickTime extends StatefulWidget {
+  final Function onChange;
+
+  PickTime({Key key, @required this.onChange}) : super(key: key);
+
+  @override
+  PickTimeState createState() => PickTimeState(onChange: onChange);
+}
+
+class PickTimeState extends State<PickTime> {
+  final Function onChange;
+  DateTime dateTime;
+
+  PickTimeState({Key key, @required this.onChange});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: FlatButton(
+        child: Text('${dateTime ?? '请选择正确时间'}'),
+        onPressed: () {
+          DatePicker.showDatePicker(context,
+              showTitleActions: true,
+              minTime: DateTime(2018, 3, 5),
+              maxTime: DateTime(2019, 6, 7), onChanged: (date) {
+            print('change $date');
+          }, onConfirm: (date) {
+            print('confirm $date');
+            setState(() {
+              dateTime = date;
+              onChange(date);
+            });
+          }, currentTime: DateTime.now(), locale: LocaleType.zh);
+        },
+      ),
+    );
+  }
+}
+~~~
+
+##### 3. 编写一个自己的包
+
++ 至少一个dart组件(编写的组件)
++ 有一个pubspec.yaml文件(引用这个包所用到的库)
+
+![](./img/Selection_017.png)
+
+dart和.yaml文件是我们需要写的，其他都会自动生成
+
+引入自己包的办法：使用path指向自己所在的相对地址
+
+![](./img/Selection_018.png)
 
