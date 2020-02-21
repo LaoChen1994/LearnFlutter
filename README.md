@@ -946,6 +946,10 @@ class MyApp extends StatelessWidget {
 + Row 是一个弹性盒模型，因此通过在子组件外包一个Expanded组件可以实现弹性布局
 + 这里适用于的布局情况是一端固定一端长度自适应，如果需要百分比布局的话需要使用FractionallySizedBox
 
+###### 效果
+
+![](./img/Selection_023.png)
+
 ##### 2. Column纵向布局
 
 ***column***是根据children中的最宽的元素作为列宽，做的整一列的布局，也支持弹性盒布局
@@ -1003,7 +1007,208 @@ class MyApp extends StatelessWidget {
 + crossAxisAlignment: 横向布局的对齐方式
 + mainAxisAlignment: 纵向布局的对齐方式
 
-##### 3. 百分比布局
+######  效果
+
+![](./img/Selection_024.png)
+
+##### 3. Flex弹性盒布局
+
++ Row和Column继承于Flex
++ Flex盒子里使用Expanded可以实现百分比的布局
+
+###### Api介绍
+
+~~~dart
+  Flex({
+    Key key,
+    @required this.direction,
+    this.mainAxisAlignment = MainAxisAlignment.start,
+    this.mainAxisSize = MainAxisSize.max,
+    this.crossAxisAlignment = CrossAxisAlignment.center,
+    this.textDirection,
+    this.verticalDirection = VerticalDirection.down,
+    this.textBaseline,
+    List<Widget> children = const <Widget>[],
+  })
+~~~
+
++ direction: 类似于Row还是Column
++ crossAxisAlignment: 元素横向对齐方式
++ mainAxisAlignment: 垂直元素对齐方式
++ mainAxisSize: 主轴元素的长度
++ children: List\<Widget\>
+
+######  代码示例
+
+~~~dart
+// Flex弹性布局
+class FlexLayout extends StatelessWidget {
+  const FlexLayout({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Scaffold(
+        appBar: AppBar(title: Text('FlexContainer')),
+        body: Column(
+          children: <Widget>[
+            Flex(
+              direction: Axis.horizontal,
+              children: <Widget>[
+                Expanded(
+                    flex: 2,
+                    child: Container(
+                      child: Text(
+                        '2/3',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      decoration: BoxDecoration(color: Colors.red),
+                    )),
+                Expanded(
+                    child: Container(
+                  child: Text(
+                    '1/3',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  decoration: BoxDecoration(color: Colors.purple),
+                ))
+              ],
+            ),
+            Text('可以嵌套')
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+~~~
+
+###### 效果
+
+![](/home/czx/Pictures/Selection_025.png)
+
+##### 4. Wrap和Flow
+
++ 如果是Row或者Column布局，超出最大长度会显示溢出，Wrap和Flow就是为了解决这个问题的，使其自动换行
++ Flow是Wrap的升级版，在Flow中的元素布局位置，完全可以自动配置
+
+**Wrap**
+
+###### Api介绍
+
+~~~dart
+Wrap({
+    Key key,
+    this.direction = Axis.horizontal,
+    this.alignment = WrapAlignment.start,
+    this.spacing = 0.0,
+    this.runAlignment = WrapAlignment.start,
+    this.runSpacing = 0.0,
+    this.crossAxisAlignment = WrapCrossAlignment.start,
+    this.textDirection,
+    this.verticalDirection = VerticalDirection.down,
+    List<Widget> children = const <Widget>[],
+})
+~~~
+
++ direction: 决定是哪个方向上实现
++ alignment: Wrap元素的排列顺序
++ spacing: 横向间隔
++ runSpacing: 纵向间隔
++ textDirection: 元素的方向，从左到右还是从右到左
+
+###### 代码示例
+
+~~~dart
+Wrap(
+    spacing: 8,
+    runSpacing: 4,
+    alignment: WrapAlignment.center,
+    textDirection: TextDirection.rtl,
+    children: nameList
+    .map((item) => (Chip(
+        label: Text('$item', style: TextStyle(fontSize: 18.0)),
+        avatar: CircleAvatar(
+            backgroundColor: Colors.blue,
+            child: Text('${item[0]}',
+                        style: TextStyle(fontSize: 20.0)),
+        ),
+    )) as Widget)
+    .toList(),
+),
+~~~
+
+**Flow** 
+
+~~~dart
+Flow({
+    Key key,
+    @required this.delegate,
+    List<Widget> children = const <Widget>[],
+})
+~~~
+
++ delegate: 一个FlowDelegate对象
++ children: List\<Widget\>
+
+~~~dart
+Flow(
+    delegate: TestFlowDelegate(margin: EdgeInsets.all(10)),
+    children: List.generate(
+        10,
+        (i) => Container(
+            child: Text('$i', style: TextStyle(fontSize: 18.0)),
+            padding: EdgeInsets.all(30),
+            decoration: BoxDecoration(
+                border: Border.all(width: 2.0, color: Colors.blue)),
+        )).toList(),
+)
+    
+    
+class TestFlowDelegate extends FlowDelegate {
+    EdgeInsets margin = EdgeInsets.zero;
+
+    TestFlowDelegate({@required this.margin});
+
+    @override
+    void paintChildren(FlowPaintingContext context) {
+        var x = margin.left;
+        var y = margin.top;
+
+        for (var i = 0; i < context.childCount; i++) {
+            var w = context.getChildSize(i).width + x + margin.right;
+            if (w <= context.size.width) {
+                context.paintChild(i, transform: Matrix4.translationValues(x, y, 0.0));
+                x = w + margin.left;
+            } else {
+                y = y + margin.top + margin.bottom + context.getChildSize(i).height;
+                x = margin.left;
+                context.paintChild(i, transform: Matrix4.translationValues(x, y, 0));
+                x = x + context.getChildSize(i).width + margin.right + margin.left;
+            }
+        }
+    }
+
+    @override
+    Size getSize(BoxConstraints constraints) {
+        // TODO: implement getSize
+        return Size(double.infinity, 500);
+    }
+
+    @override
+    bool shouldRepaint(FlowDelegate oldDelegate) {
+        // TODO: implement shouldRepaint
+        return oldDelegate != this;
+    }
+}
+~~~
+
+###### 效果
+
+![](./img/Selection_026.png)
+
+##### 5. 百分比布局
 
 百分比布局主要有两个手段
 
@@ -1113,15 +1318,33 @@ class MyApp extends StatelessWidget {
 }
 ~~~
 
-
-
 ###### 结构说明
 
 + FractionallySizedBox通过设置widthFactor, heightFactor可以将盒子的大小设置为父元素的百分比
 + FractionallySizedBox一般用来设置和父元素之间存在百分比大小的元素的场和宽，一般父元素内只有一个元素的时候用比较好
 + Flexible包裹的元素，通过flex设定其在所有flexible元素中的百分比，比如一共flex的有5份，设为flex:1的元素就是占1/5，和flex布局中的flex属性类似。
 
-##### 4. 层叠布局(绝对定位)
+##### 6. 层叠布局(绝对定位)
+
++ Stack: 类似于web中父类元素设置为display: relative
++ Positioned: 类似于子组件的display: absolute，然后通过设置top, left设置偏移距离
+
+###### Stack
+
+~~~dart
+Stack({
+    Key key,
+    this.alignment = AlignmentDirectional.topStart,
+    this.textDirection,
+    this.fit = StackFit.loose,
+    this.overflow = Overflow.clip,
+    List<Widget> children = const <Widget>[],
+})
+~~~
+
++ alignment: 使用FractionOffset可以按照父类的百分比进行布局，对于没有Positioned的，继承父类的alignment
++ fit: 如果设置为StackFit.expanded就会让子元素默认撑满父元素，使用loose属性将按照原来属性的大小进行渲染
++ children: 后入的元素层级高于前面的元素，会显示在更上层
 
 ###### 代码案例
 
@@ -1176,6 +1399,79 @@ class MyApp extends StatelessWidget {
 + 利用Positioned包裹的元素其对齐位置按照top, left设置安排，如果没有包裹的元素继承Stack中的alignment
 + Postiion中设置百分比的定位还没研究过
 + FractionaslOffset可以设置其百分比对齐位置
+
+###### 效果
+
+![](./img/Selection_027.png)
+
+##### 7. 相对布局Align
+
+###### API介绍
+
+~~~dart
+const Align({
+    Key key,
+    this.alignment = Alignment.center,
+    this.widthFactor,
+    this.heightFactor,
+    Widget child,
+})
+~~~
+
++ alignment: 对齐方式，使用FractionalOffset可以实现百分比定位(相对于父元素)
++ widthFactor: 宽度占父类的百分比宽度设置
++ heightFactor: 高度占父类的百分比高度
++ child: 需要定位的子组件
+
+###### 代码2
+
+~~~dart
+class AlignLayout extends StatelessWidget {
+    const AlignLayout({Key key}) : super(key: key);
+
+    @override
+    Widget build(BuildContext context) {
+        return Scaffold(
+            appBar: AppBar(
+                title: Text('Align'),
+            ),
+            body: Column(children: [
+                Container(
+                    width: 300,
+                    height: 300,
+                    child: Align(
+                        child: Container(
+                            child: Text('右下角'),
+                            width: 50,
+                            height: 50,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(color: Colors.blue[200]),
+                        ),
+                        alignment: Alignment.bottomRight,
+                    ),
+                    decoration: BoxDecoration(color: Colors.red[200]),
+                ),
+                Container(
+                    width: 300,
+                    height: 300,
+                    decoration: BoxDecoration(color: Colors.blue[100]),
+                    child: Align(
+                        child: Container(
+                            child: Text('另外一种居中方法'),
+                            decoration: BoxDecoration(color: Colors.red[100]),
+                        ),
+                        alignment: FractionalOffset(0.5, 0.5),
+                    ),
+                )
+            ]),
+        );
+    }
+}
+~~~
+
+###### 效果
+
+![](./img/Selection_028.png)
 
 ### 4. Dart的基础语法
 
