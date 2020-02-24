@@ -1086,7 +1086,7 @@ class FlexLayout extends StatelessWidget {
 
 ###### 效果
 
-![](/home/czx/Pictures/Selection_025.png)
+![](./img/Selection_025.png)
 
 ##### 4. Wrap和Flow
 
