@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import './container.dart';
 import './layout.dart';
+import './scroll.dart';
 
 void main() => runApp(MyApp());
 
@@ -25,7 +26,12 @@ class MyApp extends StatelessWidget {
         '/decorateBox': (context) => DecorationBoxExample(),
         '/transform': (context) => TransformExample(),
         '/scaffold': (context) => ScaffoldExample(),
-        '/clip': (context) => ClipExample()
+        '/clip': (context) => ClipExample(),
+        '/singleChildScroll': (context) => SingleChildScrollExample(),
+        '/listView': (context) => ListViewExample(),
+        '/gridView': (context) => GridViewSample(),
+        '/customScrollView': (context) => CustomScrollViewTestRoute(),
+        '/scrollControl': (context) => ScrollControl()
       },
     );
   }
@@ -147,7 +153,41 @@ class Homepage extends StatelessWidget {
                 ),
               ],
             ),
-          )
+          ),
+          ListTile(
+            title: Text('Scrollable Component'),
+            subtitle: Wrap(
+              direction: Axis.horizontal,
+              spacing: 4.0,
+              runSpacing: 8.0,
+              children: <Widget>[
+                RaisedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/singleChildScroll');
+                    },
+                    child: Text('Scrollbar')),
+                RaisedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/listView');
+                    },
+                    child: Text('ListViewScroll')),
+                RaisedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/gridView');
+                    },
+                    child: Text('GridView')),
+                RaisedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/customScrollView');
+                    },
+                    child: Text('CustomScrollView')),RaisedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/scrollControl');
+                    },
+                    child: Text('Scroll Control')),
+              ],
+            ),
+          ),
         ],
       ),
       floatingActionButton:
